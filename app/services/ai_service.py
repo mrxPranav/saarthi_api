@@ -1,8 +1,13 @@
 import os
+import logging
 from groq import AsyncGroq
 from dotenv import load_dotenv
 
 load_dotenv()
+
+# Configure logging to stdout for Render
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 class GroqService:
     def __init__(self):
@@ -12,6 +17,8 @@ class GroqService:
 
     async def generate_title(self, note_text: str) -> str:
         prompt = f"Generate a short, concise title (maximum 10 words) for the following note content. Return ONLY the title text, nothing else.\n\nNote Content:\n{note_text}"
+        
+        logger.info(f"AI Prompt: {prompt}")
         
         try:
             chat_completion = await self.client.chat.completions.create(
@@ -23,7 +30,9 @@ class GroqService:
                 ],
                 model=self.model,
             )
-            return chat_completion.choices[0].message.content.strip().strip('"')
+            response = chat_completion.choices[0].message.content.strip().strip('"')
+            logger.info(f"AI Response: {response}")
+            return response
         except Exception as e:
-            print(f"Error generating title with Groq: {e}")
+            logger.error(f"Error generating title with Groq: {e}", exc_info=True)
             return "Untitled Note"
