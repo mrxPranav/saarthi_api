@@ -3,6 +3,7 @@ from typing import Optional
 from datetime import datetime as dt
 
 class NoteBase(BaseModel):
+    title: Optional[str] = None
     note: str
     category: Optional[str] = None
     sub_category: Optional[str] = None
