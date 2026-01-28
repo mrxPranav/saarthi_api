@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 class GroqService:
     def __init__(self):
         self.api_key = os.getenv("GROQ_API_KEY")
-        self.model = os.getenv("GROQ_MODEL", "llama3-8b-8192")
+        self.model = os.getenv("GROQ_MODEL", "llama-3.1-8b-instant")
         self.client = AsyncGroq(api_key=self.api_key)
 
     async def generate_title(self, note_text: str) -> str:
