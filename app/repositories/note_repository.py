@@ -1,5 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
+from sqlalchemy import func
+from datetime import datetime, date, time
 from app.models.note import Note
 from app.schemas.note_dto import NoteCreate, NoteUpdate
 
@@ -21,6 +23,18 @@ class NoteRepository:
     async def find_by_id(self, note_id: int) -> Note | None:
         result = await self.db.execute(select(Note).filter(Note.id == note_id))
         return result.scalars().first()
+
+    async def find_created_today(self) -> list[Note]:
+        today = date.today()
+        start_of_today = datetime.combine(today, time.min)
+        result = await self.db.execute(
+            select(Note).filter(Note.datetime >= start_of_today)
+        )
+        return result.scalars().all()
+
+    async def get_all_notes_no_limit(self) -> list[Note]:
+        result = await self.db.execute(select(Note))
+        return result.scalars().all()
 
     async def update(self, note_id: int, note_update: NoteUpdate) -> Note | None:
         db_note = await self.find_by_id(note_id)
