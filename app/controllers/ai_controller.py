@@ -4,6 +4,7 @@ from app.config.database import get_db
 from app.services.note_service import NoteService
 from app.repositories.note_repository import NoteRepository
 from app.services.ai_service import GroqService
+from app.schemas.ai_dto import AIRequest, AIResponse
 
 router = APIRouter(prefix="/ai", tags=["AI Operations"])
 
@@ -40,3 +41,14 @@ async def generate_titles_for_today(
 ):
     updated_count = await service.update_todays_notes_titles_with_ai(ai_service)
     return {"message": f"Updated {updated_count} notes created today"}
+
+@router.post("/chat", response_model=AIResponse)
+async def chat_with_ai(
+    request: AIRequest,
+    ai_service: GroqService = Depends(get_ai_service)
+):
+    try:
+        response_data = await ai_service.get_custom_completion(request.role, request.content)
+        return response_data
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
