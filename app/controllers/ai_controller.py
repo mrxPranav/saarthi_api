@@ -48,7 +48,7 @@ async def chat_with_ai(
     ai_service: GroqService = Depends(get_ai_service)
 ):
     try:
-        response_data = await ai_service.get_custom_completion(request.role, request.content)
+        response_data = await ai_service.get_custom_completion(request.system_prompt, request.user_prompt)
         return response_data
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

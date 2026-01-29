@@ -17,15 +17,19 @@ class GroqService:
         self.model = os.getenv("GROQ_MODEL", "llama-3.1-8b-instant")
         self.client = AsyncGroq(api_key=self.api_key)
 
-    async def get_custom_completion(self, role: str, content: str) -> dict:
-        logger.info(f"Custom AI Request - Role: {role}, Content: {content}")
+    async def get_custom_completion(self, system_prompt: str, user_prompt: str) -> dict:
+        logger.info(f"Custom AI Request - System: {system_prompt}, User: {user_prompt}")
         
         try:
             chat_completion = await self.client.chat.completions.create(
                 messages=[
                     {
-                        "role": role,
-                        "content": content,
+                        "role": "system",
+                        "content": system_prompt,
+                    },
+                    {
+                        "role": "user",
+                        "content": user_prompt,
                     }
                 ],
                 model=self.model,
