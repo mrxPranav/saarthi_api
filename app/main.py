@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.controllers.note_controller import router as note_router
 from app.controllers.health_controller import router as health_router
 from app.controllers.ai_controller import router as ai_router
+from app.controllers.task_controller import router as task_router
 from app.config.database import db_config
 
 app = FastAPI(title="Saarthi API", description="CRUD API for Notes using FastAPI and OOP Architecture")
@@ -18,6 +19,7 @@ app.add_middleware(
 app.include_router(note_router)
 app.include_router(health_router)
 app.include_router(ai_router)
+app.include_router(task_router)
 
 @app.on_event("startup")
 async def startup_event():
