@@ -4,7 +4,7 @@ from app.config.database import get_db
 from app.services.note_service import NoteService
 from app.repositories.note_repository import NoteRepository
 from app.services.ai_service import GroqService
-from app.schemas.ai_dto import AIRequest, AIResponse
+from app.schemas.ai_dto import AIRequest, AIResponse, TypedAIRequest, AIRequestType
 
 router = APIRouter(prefix="/ai", tags=["AI Operations"])
 
@@ -49,6 +49,25 @@ async def chat_with_ai(
 ):
     try:
         response_data = await ai_service.get_custom_completion(request.system_prompt, request.user_prompt)
+        return response_data
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/generate-typed", response_model=AIResponse)
+async def generate_typed_response(
+    request: TypedAIRequest,
+    ai_service: GroqService = Depends(get_ai_service)
+):
+    try:
+        system_prompt = ""
+        if request.type == AIRequestType.STORY:
+            system_prompt = "You are a best indian story writer and you got a new idea which is : " + request.text
+        elif request.type == AIRequestType.RESEARCH:
+            system_prompt = "You are a bot good in searching web to get info, do web search and create a research report on a research idea which is : " + request.text
+        elif request.type == AIRequestType.PROJECT:
+            system_prompt = "You are a professional software engineer good in coding, you want to start a project on : " + request.text
+        
+        response_data = await ai_service.get_custom_completion(system_prompt, request.prompt)
         return response_data
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
