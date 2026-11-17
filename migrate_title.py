@@ -6,7 +6,9 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql+asyncpg://avnadmin:AVNS_GFyjoV6Dzb1NNN_RtSV@saarthi-4db-saarthi.h.aivencloud.com:11829/defaultdb")
+DATABASE_URL = os.getenv("DATABASE_URL")
+if not DATABASE_URL:
+    raise RuntimeError("DATABASE_URL is not set. Add it to app/.env or the environment.")
 
 async def migrate():
     engine = create_async_engine(DATABASE_URL)

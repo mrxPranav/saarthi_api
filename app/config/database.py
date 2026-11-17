@@ -6,9 +6,11 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# Use a default URL for local development if not set, but prefer environment variable.
-# Example: postgresql+asyncpg://user:password@localhost/dbname
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql+asyncpg://avnadmin:AVNS_GFyjoV6Dzb1NNN_RtSV@saarthi-4db-saarthi.h.aivencloud.com:11829/defaultdb")
+# DATABASE_URL must be set in app/.env or the environment.
+# Example: postgresql+asyncpg://user:password@localhost:5432/saarthi
+DATABASE_URL = os.getenv("DATABASE_URL")
+if not DATABASE_URL:
+    raise RuntimeError("DATABASE_URL is not set. Add it to app/.env or the environment.")
 
 class DatabaseConfig:
     def __init__(self):
