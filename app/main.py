@@ -1,19 +1,17 @@
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
+from fastapi import Depends, FastAPI
 from app.controllers.note_controller import router as note_router
 from app.controllers.health_controller import router as health_router
 from app.controllers.ai_controller import router as ai_router
 from app.controllers.task_controller import router as task_router
+from app.config.auth import verify_api_key
 from app.config.database import db_config
 
-app = FastAPI(title="Saarthi API", description="CRUD API for Notes using FastAPI and OOP Architecture")
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+# Every route requires a valid X-API-Key header. The Android app is not a
+# browser, so CORS is not enabled.
+app = FastAPI(
+    title="Saarthi API",
+    description="CRUD API for Notes using FastAPI and OOP Architecture",
+    dependencies=[Depends(verify_api_key)],
 )
 
 app.include_router(note_router)

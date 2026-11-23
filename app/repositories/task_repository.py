@@ -15,7 +15,7 @@ class TaskRepository:
         return db_task
 
     async def find_all(self, skip: int = 0, limit: int = 100) -> list[Task]:
-        result = await self.db.execute(select(Task).offset(skip).limit(limit))
+        result = await self.db.execute(select(Task).order_by(Task.id).offset(skip).limit(limit))
         return result.scalars().all()
 
     async def find_by_id(self, task_id: int) -> Task | None:

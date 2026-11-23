@@ -17,7 +17,7 @@ class NoteRepository:
         return db_note
 
     async def find_all(self, skip: int = 0, limit: int = 100) -> list[Note]:
-        result = await self.db.execute(select(Note).offset(skip).limit(limit))
+        result = await self.db.execute(select(Note).order_by(Note.id).offset(skip).limit(limit))
         return result.scalars().all()
 
     async def find_by_id(self, note_id: int) -> Note | None:

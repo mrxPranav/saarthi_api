@@ -1,0 +1,41 @@
+services:
+  # The FastAPI server. Reads app/.env, but DATABASE_URL is overridden so the
+  # container reaches the PostgreSQL that runs on your Windows PC.
+  api:
+    build: .
+    restart: unless-stopped
+    env_file:
+      - app/.env
+    environment:
+      DATABASE_URL: ${DATABASE_URL_DOCKER:?Set DATABASE_URL_DOCKER in the root .env file}
+
+  # Cloudflare quick tunnel: exposes the api service and writes its log to a
+  # shared volume so the updater can read the public URL.
+  tunnel:
+    image: cloudflare/cloudflared:latest
+    restart: unless-stopped
+    user: "0:0"  # the image runs as non-root, which cannot write the shared log volume
+    command: tunnel --no-autoupdate --url http://api:8000 --logfile /shared/cloudflared.log
+    volumes:
+      - shared:/shared
+    depends_on:
+      - api
+
+  # Publishes the current tunnel URL to Cloudflare KV, where the gateway Worker
+  # reads it. Replaces scripts/update-tunnel.ps1.
+  updater:
+    image: alpine:3.20
+    restart: unless-stopped
+    environment:
+      CF_ACCOUNT_ID: ${CF_ACCOUNT_ID:?Set CF_ACCOUNT_ID in the root .env file}
+      CF_KV_NAMESPACE_ID: ${CF_KV_NAMESPACE_ID:?Set CF_KV_NAMESPACE_ID in the root .env file}
+      CF_API_TOKEN: ${CF_API_TOKEN:?Set CF_API_TOKEN in the root .env file}
+    volumes:
+      - shared:/shared:ro
+      - ./docker/publish-tunnel.sh:/publish-tunnel.sh:ro
+    command: sh /publish-tunnel.sh
+    depends_on:
+      - tunnel
+
+volumes:
+  shared:
